@@ -178,6 +178,30 @@ function App() {
     setSavedInvoices((prev) => prev.filter((inv) => inv.id !== id));
   };
 
+  const handlePrintInvoice = async (invoice: SavedInvoice) => {
+    try {
+      const totalBeforeDiscount = invoice.items.reduce(
+        (sum, item) => sum + item.qty * item.unitPriceBefore,
+        0
+      );
+      const totalAfterDiscount = invoice.items.reduce(
+        (sum, item) => sum + item.qty * item.unitPriceAfter,
+        0
+      );
+      await downloadInvoicePdf({
+        clientName: invoice.clientName,
+        projectTitle: invoice.projectTitle,
+        items: invoice.items,
+        totalBeforeDiscount,
+        totalAfterDiscount,
+        totalDiscountAmount: totalBeforeDiscount - totalAfterDiscount,
+      });
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      alert('Failed to generate PDF. Please try again.');
+    }
+  };
+
   const handleNewInvoice = () => {
     handleReset();
     setPage('editor');
@@ -193,6 +217,7 @@ function App() {
         onEdit={handleEditInvoice}
         onDuplicate={handleDuplicateInvoice}
         onDelete={handleDeleteInvoice}
+        onPrint={handlePrintInvoice}
       />
     );
   }

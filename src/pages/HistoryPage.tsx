@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Plus, Search, Edit2, Copy, Trash2, FileText } from 'lucide-react';
+import { ArrowLeft, Plus, Search, Edit2, Copy, Trash2, FileText, Printer } from 'lucide-react';
 
 export interface SavedInvoice {
   id: string;
@@ -27,6 +27,7 @@ interface HistoryPageProps {
   onEdit: (invoice: SavedInvoice) => void;
   onDuplicate: (invoice: SavedInvoice) => void;
   onDelete: (id: string) => void;
+  onPrint: (invoice: SavedInvoice) => void;
 }
 
 export function HistoryPage({
@@ -36,6 +37,7 @@ export function HistoryPage({
   onEdit,
   onDuplicate,
   onDelete,
+  onPrint,
 }: HistoryPageProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -182,30 +184,38 @@ export function HistoryPage({
                 </div>
 
                 {/* Card Actions */}
-                <div className="px-4 py-3 bg-white border-t border-gray-100 flex items-center justify-between">
-                  <button
-                    onClick={() => onEdit(invoice)}
-                    className="flex items-center px-3 py-2 text-sm text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition"
-                  >
-                    <Edit2 size={14} className="mr-1.5" /> Edit
-                  </button>
-                  <button
-                    onClick={() => onDuplicate(invoice)}
-                    className="flex items-center px-3 py-2 text-sm text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition"
-                  >
-                    <Copy size={14} className="mr-1.5" /> Duplicate
-                  </button>
-                  <button
-                    onClick={() => handleDelete(invoice.id)}
-                    className={`flex items-center px-3 py-2 text-sm rounded-lg transition ${
-                      deleteConfirm === invoice.id
-                        ? 'bg-red-500 text-white'
-                        : 'text-gray-600 hover:text-red-500 hover:bg-red-50'
-                    }`}
-                  >
-                    <Trash2 size={14} className="mr-1.5" />
-                    {deleteConfirm === invoice.id ? 'Confirm?' : 'Delete'}
-                  </button>
+                <div className="px-4 py-3 bg-white border-t border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={() => onPrint(invoice)}
+                      className="flex items-center px-3 py-2 text-sm text-white bg-black hover:bg-gray-800 rounded-lg transition"
+                    >
+                      <Printer size={14} className="mr-1.5" /> Print
+                    </button>
+                    <button
+                      onClick={() => onEdit(invoice)}
+                      className="flex items-center px-3 py-2 text-sm text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition"
+                    >
+                      <Edit2 size={14} className="mr-1.5" /> Edit
+                    </button>
+                    <button
+                      onClick={() => onDuplicate(invoice)}
+                      className="flex items-center px-3 py-2 text-sm text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition"
+                    >
+                      <Copy size={14} className="mr-1.5" /> Duplicate
+                    </button>
+                    <button
+                      onClick={() => handleDelete(invoice.id)}
+                      className={`flex items-center px-3 py-2 text-sm rounded-lg transition ${
+                        deleteConfirm === invoice.id
+                          ? 'bg-red-500 text-white'
+                          : 'text-gray-600 hover:text-red-500 hover:bg-red-50'
+                      }`}
+                    >
+                      <Trash2 size={14} className="mr-1.5" />
+                      {deleteConfirm === invoice.id ? 'Confirm?' : 'Delete'}
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
