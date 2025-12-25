@@ -1,24 +1,11 @@
 import { Document, Page, View, Text, Image } from '@react-pdf/renderer';
 import { styles } from './PdfStyles';
 
-interface InvoiceItem {
-  id: string;
-  sn: string;
-  name: string;
-  description: string;
-  qty: number;
-  unitPriceBefore: number;
-  unitPriceAfter: number;
-  image: string | null;
-}
+import type { Invoice, InvoiceTotals } from '../types/invoice';
 
 interface InvoiceData {
-  clientName: string;
-  projectTitle: string;
-  items: InvoiceItem[];
-  totalBeforeDiscount: number;
-  totalAfterDiscount: number;
-  totalDiscountAmount: number;
+  invoice: Invoice;
+  totals: InvoiceTotals;
 }
 
 const formatCurrency = (val: number) => {
@@ -104,7 +91,10 @@ const warrantyClause = {
   exclusions: 'Warranty does not cover: Misuse, abuse, negligence, accidents, or intentional damage; Water leakage, humidity, heat exposure, direct sunlight damage beyond normal expectations, or chemical cleaning damage; Normal wear and tear (scratches, dents, fading, fabric wear); Improper use; Third-party modifications, repairs, relocation, or re-installation by others; Site conditions beyond Vivara Home control; Materials supplied/selected by Client outside recommendations.',
 };
 
-export const InvoicePdf = ({ data }: { data: InvoiceData }) => (
+export const InvoicePdf = ({ data }: { data: InvoiceData }) => {
+  const { invoice, totals } = data;
+
+  return (
   <Document>
     {/* Page 1: Invoice */}
     <Page size="A4" style={styles.page}>
@@ -117,10 +107,10 @@ export const InvoicePdf = ({ data }: { data: InvoiceData }) => (
         </View>
         <View style={styles.clientInfoRight}>
           <Text style={styles.clientLabel}>Client Name</Text>
-          <Text style={styles.clientName}>{data.clientName}</Text>
+          <Text style={styles.clientName}>{invoice.clientName}</Text>
           <Text style={styles.clientLabel}>Project</Text>
-          <Text style={styles.projectTitle}>{data.projectTitle}</Text>
-          <Text style={styles.instagram}>INSTAGRAM/@Vivara.home.eg</Text>
+          <Text style={styles.projectTitle}>{invoice.projectName}</Text>
+          <Text style={styles.instagram}>INSTAGRAM/{invoice.instagramHandle}</Text>
         </View>
       </View>
 
@@ -159,10 +149,10 @@ export const InvoicePdf = ({ data }: { data: InvoiceData }) => (
         </View>
 
         {/* Table Rows */}
-        {data.items.map((item) => (
+        {invoice.items.map((item) => (
           <View key={item.id} style={styles.tableRow}>
             <View style={styles.colSn}>
-              <Text style={styles.itemSn}>{item.sn}</Text>
+              <Text style={styles.itemSn}>{item.serialNumber}</Text>
             </View>
             <View style={styles.colImage}>
               {item.image ? (
@@ -172,28 +162,28 @@ export const InvoicePdf = ({ data }: { data: InvoiceData }) => (
               )}
             </View>
             <View style={styles.colItem}>
-              <Text style={styles.itemName}>{item.name}</Text>
+              <Text style={styles.itemName}>{item.itemName}</Text>
               {item.description && (
                 <Text style={styles.itemDescription}>{item.description}</Text>
               )}
             </View>
             <View style={styles.colQty}>
-              <Text style={styles.cellText}>{item.qty}</Text>
+              <Text style={styles.cellText}>{item.quantity}</Text>
             </View>
             <View style={styles.colPriceBefore}>
-              <Text style={styles.cellText}>{formatCurrency(item.unitPriceBefore)}</Text>
+              <Text style={styles.cellText}>{formatCurrency(item.priceBeforeDiscount)}</Text>
             </View>
             <View style={styles.colPriceAfter}>
-              <Text style={styles.cellTextBold}>{formatCurrency(item.unitPriceAfter)}</Text>
+              <Text style={styles.cellTextBold}>{formatCurrency(item.priceAfterDiscount)}</Text>
             </View>
             <View style={styles.colTotalBefore}>
               <Text style={styles.cellTextMuted}>
-                {formatCurrency(item.qty * item.unitPriceBefore)}
+                {formatCurrency(item.quantity * item.priceBeforeDiscount)}
               </Text>
             </View>
             <View style={styles.colTotalAfter}>
               <Text style={styles.cellTextBold}>
-                {formatCurrency(item.qty * item.unitPriceAfter)}
+                {formatCurrency(item.quantity * item.priceAfterDiscount)}
               </Text>
             </View>
           </View>
@@ -205,18 +195,18 @@ export const InvoicePdf = ({ data }: { data: InvoiceData }) => (
         <View style={styles.totalsBox}>
           <View style={styles.totalsRow}>
             <Text style={styles.totalsLabel}>Total Before Discount</Text>
-            <Text style={styles.totalsValue}>{formatCurrency(data.totalBeforeDiscount)} EGP</Text>
+            <Text style={styles.totalsValue}>{formatCurrency(totals.totalBeforeDiscount)} EGP</Text>
           </View>
           <View style={styles.totalsRow}>
             <Text style={styles.totalsLabel}>Discount Amount</Text>
-            <Text style={styles.discountValue}>- {formatCurrency(data.totalDiscountAmount)} EGP</Text>
+            <Text style={styles.discountValue}>- {formatCurrency(totals.discountAmount)} EGP</Text>
           </View>
           <View style={styles.totalsFinalRow}>
             <View>
               <Text style={styles.totalsFinalLabel}>Total After</Text>
               <Text style={styles.totalsFinalLabel}>Discount</Text>
             </View>
-            <Text style={styles.totalsFinalValue}>{formatCurrency(data.totalAfterDiscount)} EGP</Text>
+            <Text style={styles.totalsFinalValue}>{formatCurrency(totals.totalAfterDiscount)} EGP</Text>
           </View>
         </View>
       </View>
@@ -289,4 +279,5 @@ export const InvoicePdf = ({ data }: { data: InvoiceData }) => (
       </View>
     </Page>
   </Document>
-);
+  );
+};

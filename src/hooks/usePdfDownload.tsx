@@ -1,35 +1,18 @@
 import { pdf } from '@react-pdf/renderer';
 import { saveAs } from 'file-saver';
 import { InvoicePdf } from '../pdf/InvoicePdf';
+import type { Invoice } from '../types/invoice';
+import { calculateTotals } from '../types/invoice';
 
-export interface InvoiceItem {
-  id: string;
-  sn: string;
-  name: string;
-  description: string;
-  qty: number;
-  unitPriceBefore: number;
-  unitPriceAfter: number;
-  image: string | null;
-}
-
-export interface InvoiceData {
-  clientName: string;
-  projectTitle: string;
-  items: InvoiceItem[];
-  totalBeforeDiscount: number;
-  totalAfterDiscount: number;
-  totalDiscountAmount: number;
-}
-
-export async function downloadInvoicePdf(data: InvoiceData): Promise<void> {
+export async function downloadInvoicePdf(invoice: Invoice): Promise<void> {
   try {
     console.log('Starting PDF generation...');
-    const blob = await pdf(<InvoicePdf data={data} />).toBlob();
+    const totals = calculateTotals(invoice.items);
+    const blob = await pdf(<InvoicePdf data={{ invoice, totals }} />).toBlob();
     console.log('PDF blob created, size:', blob.size);
 
     // Generate filename
-    const clientName = data.clientName || 'Invoice';
+    const clientName = invoice.clientName || 'Invoice';
     const date = new Date().toISOString().split('T')[0];
     const filename = `${clientName.replace(/\s+/g, '-')}-${date}.pdf`;
 
