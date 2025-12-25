@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { RotateCcw, Printer, Plus, Trash2, ImageIcon, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { RotateCcw, Printer, Plus, Trash2, ImageIcon, Loader2, History } from 'lucide-react';
 import { downloadInvoicePdf } from './hooks/usePdfDownload';
+import { HistoryPage, type SavedInvoice } from './pages/HistoryPage';
 
 interface InvoiceItem {
   id: string;
@@ -13,13 +14,36 @@ interface InvoiceItem {
   image: string | null;
 }
 
-const initialItems: InvoiceItem[] = [];
+const HISTORY_STORAGE_KEY = 'vivara-invoice-history';
+
+// Load history from localStorage
+function loadHistory(): SavedInvoice[] {
+  try {
+    const stored = localStorage.getItem(HISTORY_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+// Save history to localStorage
+function saveHistory(invoices: SavedInvoice[]) {
+  localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(invoices));
+}
 
 function App() {
-  const [items, setItems] = useState<InvoiceItem[]>(initialItems);
+  const [page, setPage] = useState<'editor' | 'history'>('editor');
+  const [currentInvoiceId, setCurrentInvoiceId] = useState<string | null>(null);
+  const [items, setItems] = useState<InvoiceItem[]>([]);
   const [clientName, setClientName] = useState('');
   const [projectTitle, setProjectTitle] = useState('');
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [savedInvoices, setSavedInvoices] = useState<SavedInvoice[]>(loadHistory);
+
+  // Persist history to localStorage when it changes
+  useEffect(() => {
+    saveHistory(savedInvoices);
+  }, [savedInvoices]);
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('en-EG', {
@@ -73,6 +97,35 @@ function App() {
     }
   };
 
+  // Save current invoice to history
+  const saveToHistory = () => {
+    const invoiceData: SavedInvoice = {
+      id: currentInvoiceId || Date.now().toString(),
+      clientName,
+      projectTitle,
+      totalAfterDiscount,
+      itemCount: items.length,
+      savedAt: new Date().toISOString(),
+      items: [...items],
+    };
+
+    setSavedInvoices((prev) => {
+      // Check if invoice already exists (update) or is new (add)
+      const existingIndex = prev.findIndex((inv) => inv.id === invoiceData.id);
+      if (existingIndex >= 0) {
+        const updated = [...prev];
+        updated[existingIndex] = invoiceData;
+        return updated;
+      }
+      return [invoiceData, ...prev];
+    });
+
+    // Set the current invoice ID for future updates
+    if (!currentInvoiceId) {
+      setCurrentInvoiceId(invoiceData.id);
+    }
+  };
+
   const handlePrint = async () => {
     if (isGeneratingPdf) return;
 
@@ -86,6 +139,8 @@ function App() {
         totalAfterDiscount,
         totalDiscountAmount,
       });
+      // Auto-save to history on successful PDF download
+      saveToHistory();
     } catch (error) {
       console.error('PDF generation failed:', error);
       alert('Failed to generate PDF. Please try again.');
@@ -98,8 +153,51 @@ function App() {
     setItems([]);
     setClientName('');
     setProjectTitle('');
+    setCurrentInvoiceId(null);
   };
 
+  // History page handlers
+  const handleEditInvoice = (invoice: SavedInvoice) => {
+    setCurrentInvoiceId(invoice.id);
+    setClientName(invoice.clientName);
+    setProjectTitle(invoice.projectTitle);
+    setItems(invoice.items);
+    setPage('editor');
+  };
+
+  const handleDuplicateInvoice = (invoice: SavedInvoice) => {
+    const newId = Date.now().toString();
+    setCurrentInvoiceId(newId);
+    setClientName(invoice.clientName + ' (Copy)');
+    setProjectTitle(invoice.projectTitle);
+    setItems(invoice.items.map((item) => ({ ...item, id: Date.now().toString() + Math.random() })));
+    setPage('editor');
+  };
+
+  const handleDeleteInvoice = (id: string) => {
+    setSavedInvoices((prev) => prev.filter((inv) => inv.id !== id));
+  };
+
+  const handleNewInvoice = () => {
+    handleReset();
+    setPage('editor');
+  };
+
+  // Render History Page
+  if (page === 'history') {
+    return (
+      <HistoryPage
+        invoices={savedInvoices}
+        onBack={() => setPage('editor')}
+        onNew={handleNewInvoice}
+        onEdit={handleEditInvoice}
+        onDuplicate={handleDuplicateInvoice}
+        onDelete={handleDeleteInvoice}
+      />
+    );
+  }
+
+  // Render Editor Page
   return (
     <div className="min-h-screen bg-gray-100 font-sans text-gray-900 print:bg-white print:min-h-0">
       {/* Header */}
@@ -111,6 +209,17 @@ function App() {
             <span className="text-sm text-gray-300">Quotation Builder</span>
           </div>
           <div className="flex space-x-3">
+            <button
+              onClick={() => setPage('history')}
+              className="flex items-center px-3 py-2 text-sm bg-gray-800 hover:bg-gray-700 rounded transition"
+            >
+              <History size={16} className="mr-2" /> History
+              {savedInvoices.length > 0 && (
+                <span className="ml-2 bg-gray-600 text-xs px-1.5 py-0.5 rounded-full">
+                  {savedInvoices.length}
+                </span>
+              )}
+            </button>
             <button
               onClick={handleReset}
               className="flex items-center px-3 py-2 text-sm bg-gray-800 hover:bg-gray-700 rounded transition"
