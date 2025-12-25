@@ -1,0 +1,152 @@
+/* Google Fonts - Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design System CSS Variables */
+:root {
+  /* Colors - Background */
+  --bg-dark: #1a1a1a;
+  --bg-header: #2d2d2d;
+  --bg-card: #ffffff;
+  --bg-hover: #fafafa;
+  --bg-input: #f5f5f5;
+
+  /* Colors - Text */
+  --text-primary: #1a1a1a;
+  --text-secondary: #424242;
+  --text-muted: #757575;
+  --text-placeholder: #9e9e9e;
+  --text-disabled: #bdbdbd;
+
+  /* Colors - Accent */
+  --accent-teal: #26a69a;
+  --accent-teal-dark: #00897b;
+  --accent-teal-light: rgba(38, 166, 154, 0.1);
+
+  /* Colors - Borders */
+  --border-light: #e0e0e0;
+  --border-subtle: #f0f0f0;
+
+  /* Colors - Status */
+  --price-before: #ef9a9a;
+  --price-strike: #ef5350;
+  --delete-hover-bg: #ffebee;
+  --delete-hover-color: #ef5350;
+  --success-bg: #e8f5e9;
+  --success-text: #2e7d32;
+
+  /* Colors - White variants */
+  --white: #ffffff;
+  --white-muted: rgba(255, 255, 255, 0.8);
+  --white-subtle: rgba(255, 255, 255, 0.4);
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 40px;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.15);
+  --shadow-card: 0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 40px rgba(0, 0, 0, 0.15);
+  --shadow-button: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-button-hover: 0 4px 8px rgba(0, 0, 0, 0.15);
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
+
+  /* Font */
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Base Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-primary);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--border-subtle);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--text-disabled);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Input Reset */
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+}
+
+/* Button Reset */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background: white !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
